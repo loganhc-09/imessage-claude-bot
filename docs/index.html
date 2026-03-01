@@ -1,329 +1,612 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iMessage Claude Bot — Setup Guide</title>
-    <style>
-        :root {
-            --bg: #0a0a0a;
-            --surface: #141414;
-            --border: #2a2a2a;
-            --text: #e8e8e8;
-            --muted: #888;
-            --accent: #3b82f6;
-            --green: #22c55e;
-            --yellow: #eab308;
-            --red: #ef4444;
-            --code-bg: #1a1a2e;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 6rem;
-        }
-        h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
-        h2 { font-size: 1.4rem; font-weight: 600; margin: 3rem 0 1rem; color: var(--accent); }
-        h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 0.5rem; }
-        p { margin-bottom: 1rem; }
-        a { color: var(--accent); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
-        .hero-demo {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            font-family: -apple-system, sans-serif;
-        }
-        .imessage-bubble {
-            max-width: 80%;
-            padding: 10px 16px;
-            border-radius: 18px;
-            margin: 8px 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-        .sent {
-            background: var(--accent);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
-        .received {
-            background: #2a2a2a;
-            color: var(--text);
-            margin-right: auto;
-            border-bottom-left-radius: 4px;
-        }
-        .bubble-row { display: flex; }
-        .bubble-row.right { justify-content: flex-end; }
-        code {
-            background: var(--code-bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-        }
-        pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            overflow-x: auto;
-            margin: 1rem 0;
-            font-size: 0.85rem;
-            line-height: 1.6;
-        }
-        pre code { background: none; padding: 0; }
-        .step {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-        }
-        .step-number {
-            display: inline-block;
-            width: 28px;
-            height: 28px;
-            background: var(--accent);
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 28px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            margin-right: 8px;
-        }
-        .gotcha {
-            background: #1a1400;
-            border: 1px solid #3d3000;
-            border-left: 3px solid var(--yellow);
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            margin: 1rem 0;
-        }
-        .gotcha-title { color: var(--yellow); font-weight: 600; margin-bottom: 0.5rem; }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-        .feature {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .feature-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .feature-label { font-weight: 600; font-size: 0.95rem; }
-        .feature-desc { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
-        .tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .tag-free { background: #052e16; color: var(--green); }
-        .tag-mac { background: #1e1b4b; color: #a5b4fc; }
-        footer {
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
-        @media (max-width: 600px) {
-            h1 { font-size: 1.7rem; }
-            .feature-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iMessage Claude Bot — Setup Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-tertiary: #f5f5f5;
+    --border-subtle: #e5e5e5;
+    --border-medium: #d0d0d0;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --accent-gold: #c9a962;
+    --accent-sage: #7a9e9f;
+    --accent-lavender: #9b8aa5;
+    --accent-taupe: #a5897a;
+    --accent-moss: #8fa387;
+    --accent-rose: #b08b8b;
+    --positive: #7a9e7a;
+    --negative: #b08080;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 300;
+    margin-bottom: 12px;
+  }
+
+  .subtitle a { text-decoration: none; font-weight: 400; }
+  .subtitle a.author { color: var(--accent-gold); }
+  .subtitle a.tool { color: var(--accent-sage); }
+
+  .hook {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin: 48px 0 20px;
+  }
+
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 28px 0 10px;
+  }
+
+  p { margin-bottom: 14px; font-weight: 300; font-size: 0.92rem; color: var(--text-secondary); }
+  p strong { color: var(--text-primary); font-weight: 500; }
+
+  a { color: var(--accent-sage); text-decoration: none; font-weight: 400; }
+  a:hover { text-decoration: underline; }
+
+  /* ─── TOP BOXES ─── */
+  .top-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .top-box {
+    border-radius: 6px;
+    padding: 20px 22px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .top-box-context {
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--accent-gold);
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+  .top-box-context strong { color: var(--text-primary); font-weight: 500; }
+
+  .top-box-share {
+    background: linear-gradient(135deg, rgba(122,158,159,0.15) 0%, rgba(122,158,159,0.05) 100%);
+    border: 1px solid rgba(122,158,159,0.3);
+  }
+  .top-box-share .share-title { font-weight: 500; color: var(--text-primary); margin-bottom: 4px; font-size: 0.92rem; }
+  .top-box-share .share-desc { color: var(--text-secondary); font-weight: 300; font-size: 0.85rem; margin-bottom: 12px; }
+
+  .share-buttons { display: flex; gap: 8px; }
+  .share-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border-medium);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+  }
+  .share-btn:hover { border-color: var(--accent-sage); color: var(--accent-sage); text-decoration: none; }
+
+  /* ─── FEATURE GRID ─── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 24px 0 48px;
+  }
+
+  .feature-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .feature-icon { font-size: 1.3rem; margin-bottom: 8px; }
+  .feature-label { font-size: 0.78rem; font-weight: 500; color: var(--text-primary); }
+  .feature-desc { font-size: 0.72rem; color: var(--text-muted); font-weight: 300; margin-top: 4px; }
+
+  /* ─── PHONE FRAME (from content-hub) ─── */
+  .phone-frame {
+    width: 360px;
+    margin: 24px auto 48px;
+    background: #000;
+    border-radius: 32px;
+    padding: 10px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .phone-screen {
+    background: #f2f2f7;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+
+  .phone-header {
+    background: #f8f8fa;
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e5e5ea;
+  }
+
+  .phone-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-sage), var(--accent-lavender));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .phone-contact { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; line-height: 1.2; }
+  .phone-time { font-size: 0.72rem; color: #8e8e93; }
+
+  .phone-messages {
+    padding: 14px 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .msg-bubble {
+    max-width: 88%;
+    padding: 9px 14px;
+    border-radius: 18px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #1a1a1a;
+  }
+
+  .msg-sent {
+    background: #007aff;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-recv {
+    background: #e9e9eb;
+    color: #1a1a1a;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg-time {
+    font-size: 0.65rem;
+    color: #8e8e93;
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  /* ─── STEPS ─── */
+  .step {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 12px 0;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .step-1 .step-number { background: rgba(201,169,98,0.12); border: 1.5px solid rgba(201,169,98,0.4); color: var(--accent-gold); }
+  .step-2 .step-number { background: rgba(155,138,165,0.12); border: 1.5px solid rgba(155,138,165,0.4); color: var(--accent-lavender); }
+  .step-3 .step-number { background: rgba(122,158,159,0.12); border: 1.5px solid rgba(122,158,159,0.4); color: var(--accent-sage); }
+  .step-4 .step-number { background: rgba(143,163,135,0.12); border: 1.5px solid rgba(143,163,135,0.4); color: var(--accent-moss); }
+
+  .step-title { font-size: 0.95rem; font-weight: 500; color: var(--text-primary); }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82em;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--text-primary);
+  }
+
+  pre {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 10px 0;
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  /* ─── GOTCHAS ─── */
+  .gotcha {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-gold);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 12px 0;
+  }
+
+  .gotcha-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .gotcha p { margin-bottom: 0; }
+
+  /* ─── HOW IT WORKS ─── */
+  .pipeline {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .pipeline-step {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .pipeline-step:last-child { border-bottom: none; }
+
+  .pipeline-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .pipeline-text { font-size: 0.85rem; color: var(--text-secondary); font-weight: 300; line-height: 1.6; }
+  .pipeline-text strong { color: var(--text-primary); font-weight: 500; }
+
+  /* ─── COMMANDS ─── */
+  .command-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .command-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .command-card code { font-size: 0.85rem; font-weight: 500; }
+  .command-desc { font-size: 0.78rem; color: var(--text-muted); font-weight: 300; margin-top: 4px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+  footer a { color: var(--accent-gold); }
+
+  @media (max-width: 640px) {
+    .container { padding: 40px 20px; }
+    h1 { font-size: 1.6rem; }
+    .top-boxes { grid-template-columns: 1fr; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+    .phone-frame { width: 100%; max-width: 340px; }
+    .command-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<h1>iMessage Claude Bot</h1>
-<p class="subtitle">Text yourself. Claude responds. From your phone.</p>
+<div class="container">
 
-<div>
-    <span class="tag tag-free">Free</span>
-    <span class="tag tag-mac">Mac only</span>
-</div>
+  <h1>iMessage Claude Bot</h1>
+  <p class="subtitle">
+    Built by <a href="https://www.tiktok.com/@loganinthefuture" class="author">@loganinthefuture</a>
+    with <a href="https://docs.anthropic.com/en/docs/claude-code" class="tool">Claude Code</a>
+  </p>
+  <p class="hook">A Python script that turns your iMessage self-chat into a full AI agent. Text yourself from your phone — Claude Code responds in the same thread. File access, web search, code execution, image understanding. No apps, no APIs, no monthly fees.</p>
 
-<!-- Demo -->
-<div class="hero-demo">
-    <div class="bubble-row right">
-        <div class="imessage-bubble sent">What's on my plate today?</div>
+  <div class="top-boxes">
+    <div class="top-box top-box-context">
+      <strong>How it works:</strong> Your Mac stores every iMessage in a local SQLite database. This script watches that database, routes your messages to Claude Code CLI, and sends responses back via AppleScript. Everything runs locally.
     </div>
-    <div class="bubble-row">
-        <div class="imessage-bubble received">You've got the Capita call at 2pm — I pulled the latest data summary to your workspace. Also, you haven't followed up with Arjun since Tuesday. Want me to draft something?</div>
+    <div class="top-box top-box-share">
+      <div class="share-title">Share this guide</div>
+      <div class="share-desc">Know someone who'd use this?</div>
+      <div class="share-buttons">
+        <a class="share-btn" href="https://twitter.com/intent/tweet?text=Turn%20iMessage%20into%20a%20Claude%20Code%20interface%20%E2%80%94%20text%20yourself%20and%20AI%20responds.%20Free%2C%20local%2C%20Mac%20only.&url=https://loganhc-09.github.io/imessage-claude-bot/" target="_blank">𝕏 Post</a>
+        <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https://loganhc-09.github.io/imessage-claude-bot/" target="_blank">LinkedIn</a>
+        <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href);this.textContent='Copied!'">Copy link</button>
+      </div>
     </div>
-    <div class="bubble-row right">
-        <div class="imessage-bubble sent">Yes draft it, and remind me about the ETS doc</div>
+  </div>
+
+  <!-- ─── DEMO ─── -->
+  <div class="phone-frame">
+    <div class="phone-screen">
+      <div class="phone-header">
+        <div class="phone-avatar">Me</div>
+        <div>
+          <div class="phone-contact">Me</div>
+          <div class="phone-time">iMessage</div>
+        </div>
+      </div>
+      <div class="phone-messages">
+        <div class="msg-time">Today 8:41 AM</div>
+        <div class="msg-bubble msg-sent">scrape the top 10 YC companies from this batch and put them in a spreadsheet</div>
+        <div class="msg-bubble msg-recv">Done — scraped all 10 from the YC W26 directory. CSV saved to workspace/yc-w26-top10.csv with company name, one-liner, team size, and funding stage. Want me to add anything else to the columns?</div>
+        <div class="msg-bubble msg-sent">now cross-reference with LinkedIn to find which founders I'm 2nd degree connected to</div>
+        <div class="msg-bubble msg-recv">Found 4 second-degree connections across 3 companies. Saved the full map to workspace/yc-founder-connections.md. Two of them were introduced to you through the same person — want me to draft outreach?</div>
+        <div class="msg-bubble msg-sent">yes. warm intro template. casual, not cringe</div>
+        <div class="msg-bubble msg-recv">Drafted 3 intros — each personalized with mutual connection context. Saved to workspace/drafts/yc-intros.md. Tone: short, specific, no "hope this finds you well." Ready for your review.</div>
+      </div>
     </div>
-    <div class="bubble-row">
-        <div class="imessage-bubble received">Done — draft is in memory/follow-ups/arjun.md. For ETS: Joe needs your narrative doc by Friday. I can pull the template you used for Careeron if that helps.</div>
+  </div>
+
+  <!-- ─── FEATURES ─── -->
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <div class="feature-label">Native iMessage</div>
+      <div class="feature-desc">No new apps to install</div>
     </div>
-</div>
-
-<p>This is a Python script that bridges your iMessage self-chat to <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code CLI</a>. It watches your Mac's Messages database, sends your texts to Claude, and replies back in the same thread.</p>
-
-<p>You get a full AI agent from your phone — file access, web search, code execution, image understanding — in the app you already use.</p>
-
-<div class="feature-grid">
-    <div class="feature">
-        <div class="feature-icon">💬</div>
-        <div class="feature-label">Native iMessage</div>
-        <div class="feature-desc">No new apps. Works in Messages.</div>
+    <div class="feature-card">
+      <div class="feature-icon">🖼️</div>
+      <div class="feature-label">Send images</div>
+      <div class="feature-desc">Screenshots, photos, docs</div>
     </div>
-    <div class="feature">
-        <div class="feature-icon">🖼️</div>
-        <div class="feature-label">Image support</div>
-        <div class="feature-desc">Send screenshots, Claude sees them.</div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-label">Session memory</div>
+      <div class="feature-desc">Context persists across texts</div>
     </div>
-    <div class="feature">
-        <div class="feature-icon">🧠</div>
-        <div class="feature-label">Session memory</div>
-        <div class="feature-desc">Conversations persist across messages.</div>
+    <div class="feature-card">
+      <div class="feature-icon">📂</div>
+      <div class="feature-label">Full agent</div>
+      <div class="feature-desc">Files, code, web, terminal</div>
     </div>
-    <div class="feature">
-        <div class="feature-icon">📁</div>
-        <div class="feature-label">Full agent</div>
-        <div class="feature-desc">Reads files, runs code, searches web.</div>
+  </div>
+
+  <!-- ─── SETUP ─── -->
+  <h2>Setup</h2>
+  <p>About 10 minutes. No dependencies beyond Python 3 (ships with macOS) and Claude Code CLI.</p>
+
+  <div class="step step-1">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div class="step-title">Grant Full Disk Access to Python</div>
     </div>
-</div>
+    <p>The bot reads your Messages database, which macOS protects. Open <strong>System Settings → Privacy & Security → Full Disk Access</strong>, click <code>+</code>, press <code>Cmd+Shift+G</code>, type <code>/usr/bin/python3</code>, and add it.</p>
+  </div>
 
-<!-- Setup -->
-<h2>Setup (10 minutes)</h2>
-
-<h3>Prerequisites</h3>
-<ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
-    <li>Mac running macOS 13 (Ventura) or later</li>
-    <li><a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code CLI</a> installed (<code>npm install -g @anthropic-ai/claude-code</code>)</li>
-    <li>An active Claude Code subscription</li>
-</ul>
-
-<div class="step">
-    <p><span class="step-number">1</span> <strong>Grant Full Disk Access to Python</strong></p>
-    <p>The bot needs to read your Messages database. Open:</p>
-    <p><code>System Settings → Privacy & Security → Full Disk Access</code></p>
-    <p>Click <code>+</code>, press <code>Cmd+Shift+G</code>, type <code>/usr/bin/python3</code>, and add it.</p>
-</div>
-
-<div class="step">
-    <p><span class="step-number">2</span> <strong>Clone and configure</strong></p>
+  <div class="step step-2">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div class="step-title">Clone and configure</div>
+    </div>
     <pre><code>git clone https://github.com/loganhc-09/imessage-claude-bot.git
 cd imessage-claude-bot
 cp .env.example .env</code></pre>
-    <p>Edit <code>.env</code> with your Apple ID and phone number:</p>
+    <p>Edit <code>.env</code> with your details:</p>
     <pre><code>APPLE_ID=you@icloud.com
 PHONE_NUMBER=+15551234567
 CLAUDE_WORKSPACE=/path/to/your/project
 CLAUDE_PATH=/usr/local/bin/claude</code></pre>
-</div>
+  </div>
 
-<div class="step">
-    <p><span class="step-number">3</span> <strong>Create your self-chat</strong></p>
-    <p>Open Messages on your phone and send yourself a text via iMessage. This creates the thread the bot monitors.</p>
-</div>
+  <div class="step step-3">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div class="step-title">Create your self-chat</div>
+    </div>
+    <p>Open Messages on your phone and text yourself via iMessage. This creates the thread the bot monitors. You only need to do this once.</p>
+  </div>
 
-<div class="step">
-    <p><span class="step-number">4</span> <strong>Run it</strong></p>
+  <div class="step step-4">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div class="step-title">Run</div>
+    </div>
     <pre><code>python3 imessage-bot.py</code></pre>
     <p>Text yourself from your phone. Claude responds in the same thread.</p>
-</div>
+  </div>
 
-<h3>Run permanently (launchd)</h3>
-<p>To keep the bot running in the background:</p>
-<pre><code># Edit the plist with your paths first
+  <h3>Run permanently</h3>
+  <p>The repo includes a launchd plist template to keep the bot running in the background:</p>
+  <pre><code># Edit the plist with your paths first
 cp com.claude.imessage-bot.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.claude.imessage-bot.plist
 
 # Check logs
 tail -f /tmp/imessage-bot.log</code></pre>
 
-<h3>Commands</h3>
-<ul style="margin-left: 1.5rem;">
-    <li><code>/new</code> — Start a fresh Claude session</li>
-    <li><code>/status</code> — Check if the bot is running</li>
-</ul>
+  <h3>Commands</h3>
+  <div class="command-grid">
+    <div class="command-card">
+      <code>/new</code>
+      <div class="command-desc">Start a fresh Claude session</div>
+    </div>
+    <div class="command-card">
+      <code>/status</code>
+      <div class="command-desc">Check if the bot is running</div>
+    </div>
+  </div>
 
-<!-- Gotchas -->
-<h2>Gotchas (the hard-won knowledge)</h2>
+  <!-- ─── GOTCHAS ─── -->
+  <h2>Gotchas</h2>
+  <p>We hit every one of these building this. Saving you the debugging.</p>
 
-<p>These are the problems we hit building this. You'll probably hit them too.</p>
+  <div class="gotcha">
+    <div class="gotcha-title">Two self-chats</div>
+    <p>iMessage creates <strong>separate threads</strong> for your email and phone number. Your text might land in one while the bot watches the other. That's why <code>.env</code> has both <code>APPLE_ID</code> and <code>PHONE_NUMBER</code> — the bot monitors both and replies to whichever you messaged from.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ Two self-chats</div>
-    <p>iMessage creates <em>separate</em> threads for your email and phone number. If you text yourself from your phone, it might land in the phone-number thread while the bot watches the email thread. That's why <code>.env</code> has both <code>APPLE_ID</code> and <code>PHONE_NUMBER</code> — the bot monitors both and replies to whichever one you messaged from.</p>
-</div>
+  <div class="gotcha">
+    <div class="gotcha-title">Full Disk Access after restart</div>
+    <p>When launchd restarts Python, FDA can take seconds to activate. The bot retries automatically for up to 2.5 minutes. If you see "authorization denied" in the error log, it usually resolves itself.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ Full Disk Access after restart</div>
-    <p>When launchd restarts the Python process, FDA can take a few seconds to kick in. The bot retries automatically for up to 2.5 minutes. If you see "authorization denied" in the error log, it usually resolves itself. If it doesn't, re-add <code>/usr/bin/python3</code> to FDA.</p>
-</div>
+  <div class="gotcha">
+    <div class="gotcha-title">The attributedBody problem</div>
+    <p>Messages sent via AppleScript store text in a <strong>binary blob</strong> (NSAttributedString typedstream) instead of the text column. The bot includes a custom parser for Apple's undocumented format. If messages seem invisible, this is probably why.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ attributedBody parsing</div>
-    <p>Messages sent via AppleScript store text in a binary blob (NSAttributedString "typedstream" format) instead of the text column. The bot includes a parser for this. If you see empty messages being skipped, this is likely why — the parser handles the common cases but Apple's format is undocumented.</p>
-</div>
+  <div class="gotcha">
+    <div class="gotcha-title">Image attachments need staging</div>
+    <p>Images live in <code>~/Library/Messages/Attachments/</code> which requires FDA. The bot's Python process has FDA, but Claude CLI doesn't. So the bot copies images to <code>/tmp/</code> before passing paths to Claude. This is automatic.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ Image attachments need staging</div>
-    <p>Images are stored in <code>~/Library/Messages/Attachments/</code>, which requires FDA. The bot (python3) has FDA, but Claude Code CLI doesn't. So the bot copies images to <code>/tmp/</code> before passing paths to Claude. This happens automatically.</p>
-</div>
+  <div class="gotcha">
+    <div class="gotcha-title">iCloud sync delay</div>
+    <p>Messages from your phone sync to your Mac via iCloud — usually instant, sometimes 30-60 seconds. If the bot doesn't respond, make sure Messages on your Mac is open and syncing.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ iCloud sync delay</div>
-    <p>Messages sent from your phone sync to your Mac via iCloud. This is usually instant, but can take 30-60 seconds. If the bot doesn't respond, check that the Messages app on your Mac is open and syncing. Having it in the foreground helps.</p>
-</div>
+  <div class="gotcha">
+    <div class="gotcha-title">Infinite loop prevention</div>
+    <p>You're texting yourself, so the bot's replies appear as new messages. Without protection, it would process its own responses forever. We prevent this with MD5 hash tracking of sent messages and ROWID advancement after each send.</p>
+  </div>
 
-<div class="gotcha">
-    <div class="gotcha-title">⚠️ Infinite loop prevention</div>
-    <p>Since you're texting yourself, the bot's replies appear as new messages. Without protection, the bot would process its own responses forever. We prevent this with MD5 hash tracking of sent messages and ROWID advancement after each send.</p>
-</div>
+  <!-- ─── HOW IT WORKS ─── -->
+  <h2>Under the hood</h2>
 
-<!-- How it works -->
-<h2>How it works</h2>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-num">1</div>
+      <div class="pipeline-text"><strong>Poll</strong> — Reads <code>~/Library/Messages/chat.db</code> every 3 seconds for new messages in your self-chat</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">2</div>
+      <div class="pipeline-text"><strong>Extract</strong> — Pulls text from either the <code>text</code> column or the <code>attributedBody</code> binary blob</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">3</div>
+      <div class="pipeline-text"><strong>Stage</strong> — Copies any image attachments to <code>/tmp/</code> where Claude CLI can read them</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">4</div>
+      <div class="pipeline-text"><strong>Process</strong> — Sends the message to Claude Code CLI with session persistence via <code>--resume</code></div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">5</div>
+      <div class="pipeline-text"><strong>Reply</strong> — Sends Claude's response back via AppleScript to the same thread</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-num">6</div>
+      <div class="pipeline-text"><strong>Advance</strong> — Skips past its own reply in the database to prevent infinite loops</div>
+    </div>
+  </div>
 
-<p>Your Mac stores every iMessage in a SQLite database at <code>~/Library/Messages/chat.db</code>. The bot:</p>
+  <p>No network APIs. No third-party services. Everything runs locally on your Mac.</p>
 
-<ol style="margin-left: 1.5rem;">
-    <li>Polls <code>chat.db</code> every 3 seconds for new messages in your self-chat</li>
-    <li>Extracts text (from either the <code>text</code> column or the <code>attributedBody</code> binary blob)</li>
-    <li>Copies any image attachments to <code>/tmp/</code> for Claude to read</li>
-    <li>Sends the message to Claude Code CLI (<code>claude -p</code>) with session persistence</li>
-    <li>Replies via AppleScript to the same thread the message came from</li>
-    <li>Advances past its own reply to prevent infinite loops</li>
-</ol>
+  <!-- ─── CUSTOMIZATION ─── -->
+  <h2>Make it yours</h2>
 
-<p>No network APIs. No third-party services. Everything runs locally on your Mac.</p>
+  <h3>Give Claude context</h3>
+  <p>Create a <code>CLAUDE.md</code> file in your workspace. The bot reads this on every new session. Put your preferences, projects, role, tone — whatever you want Claude to know about you.</p>
 
-<!-- Customization -->
-<h2>Make it yours</h2>
+  <h3>Log conversations</h3>
+  <p>Set <code>LOG_DIR</code> in <code>.env</code> to save daily conversation logs as markdown. Useful for building memory systems or reviewing what you've discussed.</p>
 
-<h3>Give Claude context about you</h3>
-<p>Create a <code>CLAUDE.md</code> file in your workspace directory. The bot reads this on every new session. Put your preferences, projects, personality notes — whatever you want Claude to know about you.</p>
+  <h3>Chief of staff mode</h3>
+  <p>With a good <code>CLAUDE.md</code>, Claude can act as a personal assistant — morning briefings, meeting prep, follow-up tracking, research. The interface is just texting.</p>
 
-<h3>Log conversations</h3>
-<p>Set <code>LOG_DIR</code> in <code>.env</code> to save daily conversation logs as markdown files. Useful for building a memory system or reviewing what you've discussed.</p>
-
-<h3>Use as a chief of staff</h3>
-<p>With a good <code>CLAUDE.md</code>, Claude can serve as a personal assistant — morning briefings, meeting prep, follow-up tracking, content triage. The interface is just texting.</p>
-
-<footer>
-    <p>Built by <a href="https://www.tiktok.com/@loganinthefuture">@loganinthefuture</a> with Claude Code.</p>
+  <footer>
     <p>Part of the <a href="https://loganinthefuture.substack.com/">Captain's Log</a> series on building personal AI operating systems.</p>
-    <p style="margin-top: 0.5rem;"><a href="https://github.com/loganhc-09/imessage-claude-bot">View on GitHub</a></p>
-</footer>
+    <p style="margin-top: 6px;"><a href="https://github.com/loganhc-09/imessage-claude-bot">View on GitHub</a></p>
+  </footer>
 
+</div>
 </body>
 </html>
