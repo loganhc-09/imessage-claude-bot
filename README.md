@@ -27,6 +27,21 @@ python3 imessage-bot.py
 - Full Disk Access granted to `/usr/bin/python3`
 - An iMessage self-chat (text yourself once to create it)
 
+## Troubleshooting: FDA Loss
+
+The most common issue is macOS intermittently revoking Full Disk Access (FDA) from the Python process. When this happens, the bot can't read `chat.db` and stops processing messages.
+
+**Symptoms:** Bot log shows `[fda-lost] Authorization denied for chat.db` and stops responding.
+
+**What's happening:** macOS TCC (Transparency, Consent, and Control) can revoke FDA from long-running processes, especially after they spawn subprocesses (like the Claude CLI). The bot now handles this automatically:
+
+1. **Fast detection** — fails in 6 seconds instead of spinning for 2.5 minutes
+2. **Exponential backoff** — waits 30s, 60s, 120s, 300s instead of burning CPU
+3. **Self-notification** — texts you after 2 min of downtime with instructions
+4. **Self-restart** — exits after 10 min so launchd spawns a fresh process (which usually fixes it)
+
+**If it persists:** System Settings → Privacy & Security → Full Disk Access → toggle Python off, then on again. Or manually restart: `launchctl kickstart -k gui/$(id -u)/com.claude.imessage-bot`
+
 ## About
 
 Made by [Logan Currie](https://www.tiktok.com/@loganinthefuture) with Claude Code.

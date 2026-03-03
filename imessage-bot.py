@@ -159,24 +159,120 @@ def save_state(state: dict):
 
 
 # ---------------------------------------------------------------------------
-# Database access (with FDA retry)
+# Database access (resilient FDA handling)
 # ---------------------------------------------------------------------------
-# Full Disk Access can take a few seconds to activate after a launchd
-# restart. We retry instead of crashing.
+# macOS Full Disk Access (FDA) can be lost intermittently — the TCC daemon
+# may revoke authorization after long-running processes spawn subprocesses.
+# Instead of spinning in a tight retry loop (which burns CPU for hours),
+# we use a persistent connection manager with exponential backoff and
+# self-recovery.
 
-def open_chatdb(max_retries: int = 30, retry_delay: int = 5) -> sqlite3.Connection:
-    for attempt in range(max_retries):
-        try:
-            conn = sqlite3.connect(f"file:{CHAT_DB}?mode=ro", uri=True)
-            conn.execute("SELECT 1 FROM message LIMIT 1")
-            return conn
-        except sqlite3.DatabaseError as e:
-            if "authorization" in str(e).lower() and attempt < max_retries - 1:
-                log(f"[waiting] FDA not ready ({attempt + 1}/{max_retries}), retrying in {retry_delay}s...")
-                time.sleep(retry_delay)
-            else:
+class FDAError(Exception):
+    """Raised when Full Disk Access is denied for chat.db."""
+    pass
+
+
+class ChatDB:
+    """Persistent, resilient connection to chat.db.
+
+    - Reuses a single connection (fewer TCC checks = less likely to lose FDA).
+    - On FDA loss: fast failure (3 retries, 6s), then exponential backoff.
+    - Sends iMessage notification after 2 min of downtime.
+    - Self-restarts after 10 min to get a fresh TCC context from launchd.
+    """
+
+    def __init__(self):
+        self._conn: sqlite3.Connection | None = None
+        self._fda_lost_since: float | None = None
+        self._notified: bool = False
+        self._consecutive_failures: int = 0
+
+    def get_connection(self) -> sqlite3.Connection:
+        """Get a working connection. Raises FDAError if access is denied."""
+        if self._conn:
+            try:
+                self._conn.execute("SELECT 1 FROM message LIMIT 1")
+                self._on_success()
+                return self._conn
+            except sqlite3.DatabaseError:
+                self._close_quiet()
+
+        for attempt in range(3):
+            try:
+                conn = sqlite3.connect(f"file:{CHAT_DB}?mode=ro", uri=True)
+                conn.execute("SELECT 1 FROM message LIMIT 1")
+                self._conn = conn
+                self._on_success()
+                return conn
+            except sqlite3.DatabaseError as e:
+                if "authorization" in str(e).lower() and attempt < 2:
+                    time.sleep(2)
+                    continue
+                if "authorization" in str(e).lower():
+                    self._on_failure()
+                    raise FDAError("Full Disk Access denied for chat.db")
                 raise
-    raise RuntimeError("Could not open chat.db — check Full Disk Access")
+
+        self._on_failure()
+        raise FDAError("Full Disk Access denied for chat.db")
+
+    def _on_success(self):
+        if self._fda_lost_since:
+            elapsed = time.time() - self._fda_lost_since
+            log(f"[fda-recovered] Access restored after {int(elapsed)}s")
+        self._fda_lost_since = None
+        self._notified = False
+        self._consecutive_failures = 0
+
+    def _on_failure(self):
+        now = time.time()
+        if not self._fda_lost_since:
+            self._fda_lost_since = now
+            log("[fda-lost] Authorization denied for chat.db")
+        self._consecutive_failures += 1
+
+        # Notify after 2 minutes (once)
+        if not self._notified and now - self._fda_lost_since > 120:
+            try:
+                send_imessage(
+                    "Bot lost Full Disk Access to chat.db — messages aren't being processed. "
+                    "Restarting in ~10 min to try a fresh TCC context. "
+                    "If it persists: System Settings > Privacy & Security > Full Disk Access, "
+                    "toggle Python off then on.",
+                )
+                self._notified = True
+                log("[fda-notify] Sent iMessage notification about FDA loss")
+            except Exception:
+                pass
+
+        # Self-restart after 10 min — fresh process often fixes TCC issues
+        if now - self._fda_lost_since > 600:
+            log("[fda-restart] FDA lost for 10+ min. Exiting for launchd restart.")
+            os._exit(1)
+
+    def get_backoff_delay(self) -> float:
+        """Exponential backoff: 30s, 60s, 120s, 300s (cap)."""
+        return min(30 * (2 ** min(self._consecutive_failures - 1, 4)), 300)
+
+    def _close_quiet(self):
+        if self._conn:
+            try:
+                self._conn.close()
+            except Exception:
+                pass
+            self._conn = None
+
+    @property
+    def is_fda_lost(self) -> bool:
+        return self._fda_lost_since is not None
+
+
+_chatdb = ChatDB()
+
+
+def open_chatdb() -> sqlite3.Connection:
+    """Open chat.db via the persistent connection manager."""
+    return _chatdb.get_connection()
 
 
 # ---------------------------------------------------------------------------
@@ -201,7 +297,6 @@ def get_self_chat_ids() -> tuple[list[int], dict[int, str]]:
         identifiers,
     )
     rows = cursor.fetchall()
-    conn.close()
 
     chat_ids = [r[0] for r in rows]
     chat_id_map = {r[0]: r[1] for r in rows}
@@ -221,7 +316,6 @@ def get_current_max_rowid(chat_ids: list[int]) -> int:
         chat_ids,
     )
     row = cursor.fetchone()
-    conn.close()
     return row[0] if row and row[0] else 0
 
 
@@ -242,7 +336,6 @@ def get_new_messages(chat_ids: list[int], last_rowid: int) -> list:
         [*chat_ids, last_rowid],
     )
     messages = cursor.fetchall()
-    conn.close()
     return messages
 
 
@@ -284,7 +377,6 @@ def get_attachments(message_rowid: int) -> list[dict]:
             "name": transfer_name or "",
             "size": total_bytes or 0,
         })
-    conn.close()
     return attachments
 
 
@@ -421,7 +513,21 @@ def main():
         sys.exit(1)
 
     log("iMessage Claude Bot starting")
-    chat_ids, chat_id_map = get_self_chat_ids()
+
+    # Startup retries — FDA may take time to activate after launchd restart
+    chat_ids = chat_id_map = None
+    for startup_attempt in range(10):
+        try:
+            chat_ids, chat_id_map = get_self_chat_ids()
+            break
+        except FDAError:
+            wait = min(10 * (startup_attempt + 1), 60)
+            log(f"[startup] FDA not ready (attempt {startup_attempt + 1}/10), waiting {wait}s...")
+            time.sleep(wait)
+    else:
+        log("[startup] Could not get FDA after 10 attempts. Exiting.")
+        sys.exit(1)
+
     if not chat_ids:
         print(f"No self-chat found for {APPLE_ID}")
         print("Text yourself on iMessage first to create the thread.")
@@ -548,6 +654,10 @@ def main():
             log("\nStopping...")
             save_state(state)
             break
+        except FDAError:
+            delay = _chatdb.get_backoff_delay()
+            log(f"[fda-backoff] Waiting {int(delay)}s before retrying...")
+            time.sleep(delay)
         except Exception as e:
             log(f"[error] {e}")
             time.sleep(POLL_INTERVAL)
